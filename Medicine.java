@@ -114,7 +114,7 @@ public class Medicine {
                 SingleMedicine myObj = new SingleMedicine();
                 myObj=DECRYPT_STRING(CombinedString);
 
-                System.out.println("Friend ID: " + myObj.ID
+                System.out.println("Medicine ID: " + myObj.ID
                         + "\n" + "Name: " + myObj.name
                         + "\n" + "Quantity: " + myObj.qty
                         + "\n" + "Company Name: " + myObj.cmpname
@@ -158,7 +158,7 @@ public class Medicine {
                 if(name.equals(myObj.name))
                 {
                     found=true;
-                    System.out.println("Friend ID: " + myObj.ID
+                    System.out.println("Medicine ID: " + myObj.ID
                             + "\n" + "Name: " + myObj.name
                             + "\n" + "Quantity: " + myObj.qty
                             + "\n" + "Company Name: " + myObj.cmpname
@@ -542,6 +542,99 @@ public class Medicine {
             System.out.println(nef);
         }
     }
+    public static void PURCHASE_FOR_CUSTOMER()
+    {
+        Scanner in = new Scanner(System.in);
+        System.out.print("Enter a name: ");
+        String nameToBeUpdated=in.nextLine();
+        System.out.print("Enter  quantity: ");
+        int quantityNeeded=in.nextInt();
+        float saleCost=1;
+        try {
+
+            File file = new File("friendsContact.txt");
+
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            boolean found = false;
+            while (raf.getFilePointer() < raf.length()) {
+                String CombinedString = raf.readLine();
+                SingleMedicine myObj = new SingleMedicine();
+                myObj=DECRYPT_STRING(CombinedString);
+                if (nameToBeUpdated.equals(myObj.name) && quantityNeeded<= myObj.qty) {
+                    found = true;
+                    break;
+                }
+                else if(nameToBeUpdated.equals(myObj.name) && quantityNeeded> myObj.qty){
+                    System.out.print("SORRY! your required quantity was not present in our stock \n");
+                    System.out.print("Please enter a valid quantity \n");
+                    return;
+                }
+            }
+
+
+            // Update the contact if record exists.
+            if (found) {
+                // Creating a temporary file with file pointer as tmpFile.
+                File tmpFile = new File("temp.txt");
+                RandomAccessFile tmpraf = new RandomAccessFile(tmpFile, "rw");
+                raf.seek(0);
+
+                while (raf.getFilePointer() < raf.length()) {
+                    String CombinedString = raf.readLine();
+                    SingleMedicine myObj = new SingleMedicine();
+                    myObj=DECRYPT_STRING(CombinedString);
+                    if (nameToBeUpdated.equals(myObj.name)) {
+
+                        // Update the number of this contact
+                        //SingleMedicine data=INPUT();
+                        CombinedString=String.valueOf(myObj.ID)
+                                +"!"+ myObj.name
+                                +"!"+ String.valueOf(myObj.qty-quantityNeeded)
+                                +"!"+ myObj.cmpname
+                                +"!"+ myObj.supname
+                                +"!"+ String.valueOf(myObj.unitCost)
+                                +"!"+ String.valueOf(myObj.saleCost);
+                        saleCost= myObj.saleCost;
+                    }
+                    tmpraf.writeBytes(CombinedString);
+                    tmpraf.writeBytes(System.lineSeparator());
+
+                }
+                raf.seek(0);
+                tmpraf.seek(0);
+                while (tmpraf.getFilePointer() < tmpraf.length()) {
+                    raf.writeBytes(tmpraf.readLine());
+                    raf.writeBytes(System.lineSeparator());
+                }
+                raf.setLength(tmpraf.length());
+                tmpraf.close();
+                raf.close();
+                tmpFile.delete();
+                System.out.println("Your Bill: " );
+                System.out.println("Name of the medicine: " + nameToBeUpdated);
+                System.out.println("Quantity: " + quantityNeeded);
+                float cost;
+                cost=quantityNeeded*saleCost;
+                System.out.println("Cost: " + cost );
+            }
+
+            else {
+                raf.close();
+                System.out.println(" Input name does not exists. ");
+            }
+        }
+
+        catch (IOException ioe) {
+            System.out.println(ioe);
+        }
+
+        catch (NumberFormatException nef) {
+            System.out.println(nef);
+        }
+    }
     public static void CUSTOMER()
     {
         char ch1;
@@ -565,7 +658,7 @@ public class Medicine {
                     SEARCH_FOR_CUSTOMER();
                     break;
                 case 3:
-//                    PURCHASE_FOR_CUSTOMER();
+                    PURCHASE_FOR_CUSTOMER();
                     break;
                 case 4:
                     break;
